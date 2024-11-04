@@ -5,6 +5,7 @@ try:
 except ImportError:
     import importlib.util
     import sys
+
     spec = importlib.util.spec_from_file_location("minitorch", "minitorch/__init__.py")
     foo = importlib.util.module_from_spec(spec)
     sys.modules["minitorch"] = foo
