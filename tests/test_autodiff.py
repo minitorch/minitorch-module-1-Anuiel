@@ -36,6 +36,20 @@ class Function2(ScalarFunction):
         return d_output * (y + 1), d_output * x
 
 
+class Function3(ScalarFunction):
+    @staticmethod
+    def forward(ctx: Context, x: float, y: float, z: float) -> float:
+        "$f(x, y) = x \times y \times z$"
+        ctx.save_for_backward(x, y, z)
+        return x * y * z
+
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> Tuple[float, float, float]:
+        "Derivatives are $f'_x(x, y, z) = yz$, $f'_y(x, y, z) = xz$" "and $f'_y(x, y, z) = yz$"
+        x, y, z = ctx.saved_values
+        return d_output * y * z, d_output * x * z, d_output * x * y
+
+
 # Checks for the chain rule function.
 
 
@@ -94,6 +108,28 @@ def test_chain_rule4() -> None:
     variable, deriv = back[1]
     # assert variable.name == var2.name
     assert deriv == 5 * 5
+
+
+@pytest.mark.task1_3
+def test_chain_rule5() -> None:
+    var1 = minitorch.Scalar(5)
+    var2 = minitorch.Scalar(10)
+    var3 = minitorch.Scalar(20)
+
+    out = Function3.apply(var1, var2, var3)
+
+    back = out.chain_rule(d_output=2)
+    back = list(back)
+    assert len(back) == 3
+    variable, deriv = back[0]
+    # assert variable.name == var1.name
+    assert deriv == 10 * 20 * 2
+    variable, deriv = back[1]
+    # assert variable.name == var2.name
+    assert deriv == 5 * 20 * 2
+    variable, deriv = back[2]
+    # assert variable.name == var3.name
+    assert deriv == 5 * 10 * 2
 
 
 # ## Task 1.4 - Run some simple backprop tests
