@@ -1,6 +1,15 @@
 import networkx as nx
 
-import minitorch
+try:
+    import minitorch
+except ImportError:
+    import importlib.util
+    import sys
+    spec = importlib.util.spec_from_file_location("minitorch", "minitorch/__init__.py")
+    foo = importlib.util.module_from_spec(spec)
+    sys.modules["minitorch"] = foo
+    spec.loader.exec_module(foo)
+    import minitorch
 
 
 def build_expression(code):
